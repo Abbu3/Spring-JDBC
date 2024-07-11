@@ -1,0 +1,156 @@
+package com.abdul.java.SpringJDBC.Entity;
+import org.springframework.stereotype.Component;
+@Component
+public class Product {
+	private long pId;
+	private String pName;
+	private double pPrice;
+	public long getpId() {
+		return pId;
+	}
+	public void setpId(long pId) {
+		this.pId = pId;
+	}
+	public String getpName() {
+		return pName;
+	}
+	public void setpName(String pName) {
+		this.pName = pName;
+	}
+	public double getpPrice() {
+		return pPrice;
+	}
+	public void setpPrice(double pPrice) {
+		this.pPrice = pPrice;
+	}
+	public Product(long pId, String pName, double pPrice) {
+		super();
+		this.pId = pId;
+		this.pName = pName;
+		this.pPrice = pPrice;
+	}
+	public Product() {
+		super();
+	}
+	@Override
+	public String toString() {
+		return "Product [pId=" + pId + ", pName=" + pName + ", pPrice=" + pPrice + "]";
+	}
+}
+
+
+package com.abdul.java.SpringJDBC.Dao;
+import com.abdul.java.SpringJDBC.Entity.Product;
+public interface ProductDao {
+    //insert the values into the table
+	    public Product insertProductValues(Product product);
+}
+
+
+package com.abdul.java.SpringJDBC.DaoImpl;
+import org.springframework.jdbc.core.JdbcTemplate;
+import com.abdul.java.SpringJDBC.Dao.ProductDao;
+import com.abdul.java.SpringJDBC.Entity.Product;
+public class ProductDaoImpl implements ProductDao {
+	private JdbcTemplate jdbcTemplate;
+	public JdbcTemplate getJdbcTemplate() {
+		return jdbcTemplate;
+	}
+	public void setJdbcTemplate(JdbcTemplate jdbcTemplate) {
+		this.jdbcTemplate = jdbcTemplate;
+	}
+  //insert data in the table
+	@Override
+	public Product insertProductValues(Product product) {
+		String insert = "insert into product values(?, ?, ?)";
+		int update = jdbcTemplate.update(insert, product.getpId(), product.getpName(), product.getpPrice());	
+		System.out.println("Values are inserted successfully");
+		return product;
+	}
+}
+
+
+package com.abdul.java.SpringJDBC.Configuration;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
+import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.jdbc.datasource.DriverManagerDataSource;
+import com.abdul.java.SpringJDBC.DaoImpl.ProductDaoImpl;
+import com.abdul.java.SpringJDBC.Entity.Product;
+@Configuration
+public class ProductConfiguration {
+	@Bean("driverManagerDataSource")
+	public DriverManagerDataSource getDriverManagerDataSource() {
+		DriverManagerDataSource driverManagerDataSource = new DriverManagerDataSource();
+		driverManagerDataSource.setDriverClassName("com.mysql.cj.jdbc.Driver");
+		driverManagerDataSource.setUrl("jdbc:mysql://localhost:3306/springjdbc");
+		driverManagerDataSource.setUsername("root");
+		driverManagerDataSource.setPassword("abbu123");
+		return driverManagerDataSource;
+	}
+	@Bean("jdbcTemplate")
+	public JdbcTemplate getJdbcTemplate() {
+		JdbcTemplate jdbcTemplate = new JdbcTemplate();
+		jdbcTemplate.setDataSource(getDriverManagerDataSource());
+		return jdbcTemplate;
+	}
+	@Bean("productDaoImpl")
+	public ProductDaoImpl getProductDaoImpl() {
+		ProductDaoImpl productDaoImpl = new ProductDaoImpl();
+		productDaoImpl.setJdbcTemplate(getJdbcTemplate());
+		return productDaoImpl;
+	}
+	@Bean("product")
+	public Product getProduct() {
+		Product product = new Product();
+		product.setpId(1);
+		product.setpName("Lux");
+		product.setpPrice(45.34);
+		return product;	
+	}
+	@Bean("product1")
+	public Product getProduct1() {
+		Product product1 = new Product();
+		product1.setpId(2);
+		product1.setpName("Mysore Sandal");
+		product1.setpPrice(90.21);
+		return product1;
+	}
+	@Bean("product2")
+	public Product getProduct2() {
+		Product product2 = new Product();
+		product2.setpId(3);
+		product2.setpName("Chintol");
+		product2.setpPrice(52.60);
+		return product2;
+		
+	}
+}
+
+
+package com.abdul.java.SpringJDBC;
+import java.text.Annotation;
+import java.util.List;
+import org.springframework.context.ApplicationContext;
+import org.springframework.context.annotation.AnnotationConfigApplicationContext;
+import com.abdul.java.SpringJDBC.Configuration.ProductConfiguration;
+import com.abdul.java.SpringJDBC.Dao.ProductDao;
+import com.abdul.java.SpringJDBC.DaoImpl.ProductDaoImpl;
+import com.abdul.java.SpringJDBC.Entity.Product;
+public class App {
+    public static void main( String[] args ) {
+        System.out.println( "Hello World!");
+        ApplicationContext applicationContext = new AnnotationConfigApplicationContext(ProductConfiguration.class);
+        ProductDaoImpl bean0 = applicationContext.getBean("productDaoImpl", ProductDaoImpl.class);
+        Product bean00 = applicationContext.getBean("product", Product.class);
+        Product bean01 = applicationContext.getBean("product1", Product.class);
+        Product bean02 = applicationContext.getBean("product2", Product.class);
+        bean0.insertProdctValues(bean00);
+        bean0.insertProductValues(bean01);
+        bean0.insertProductValues(bean02);
+    }
+}
+
+
+        
+
